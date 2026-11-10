@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-pink-50/50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chief of Staff Task Tracker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        rose: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                            800: '#9f1239',
+                            900: '#881337',
+                            950: '#4c0519',
+                        },
+                        pink: {
+                            25: '#fffafc',
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            300: '#f9a8d4',
+                            400: '#f472b6',
+                            500: '#ec4899',
+                            600: '#db2777',
+                            700: '#be185d',
+                            800: '#9d174d',
+                            900: '#831843',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #fce7f3; }
+        ::-webkit-scrollbar-thumb { background: #f472b6; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #db2777; }
+    </style>
+</head>
+<body class="h-full bg-slate-50/60 text-slate-800 flex flex-col antialiased selection:bg-pink-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="border-b border-pink-200/80 bg-white/90 backdrop-blur-md sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-pink-600 via-pink-500 to-rose-400 flex items-center justify-center shadow-lg shadow-pink-500/25">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg tracking-tight text-slate-900">
+                        Chief of Staff <span class="text-pink-600 text-xs px-2 py-0.5 rounded-full border border-pink-200 bg-pink-50 font-medium">Task Engine</span>
+                    </h1>
+                    <p class="text-xs text-slate-500">Structured Data Foundation for AI Chief of Staff</p>
+                </div>
+            </div>
+
+            <!-- Global Action Bar -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <!-- Smart Auto-Prioritize -->
+                <button id="btnAutoSort" onclick="autoPrioritize()" title="Auto Sort by Due Date, Priority & Effort" class="px-3 py-1.5 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-semibold border border-pink-200 transition flex items-center gap-1.5 shadow-sm active:scale-95">
+                    <svg class="w-3.5 h-3.5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    <span>Auto-Prioritize</span>
+                </button>
+
+                <!-- CSV Import -->
+                <label class="px-3 py-1.5 rounded-lg bg-white hover:bg-pink-50 text-slate-700 text-xs font-semibold border border-slate-200 hover:border-pink-300 transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-95">
+                    <svg class="w-3.5 h-3.5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    <span>Import CSV</span>
+                    <input type="file" id="csvFileInput" accept=".csv" class="hidden" onchange="handleCSVImport(event)">
+                </label>
+
+                <!-- CSV Export -->
+                <button onclick="exportToCSV()" class="px-3 py-1.5 rounded-lg bg-white hover:bg-pink-50 text-slate-700 text-xs font-semibold border border-slate-200 hover:border-pink-300 transition flex items-center gap-1.5 shadow-sm active:scale-95">
+                    <svg class="w-3.5 h-3.5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    <span>Export CSV</span>
+                </button>
+
+                <!-- New Task Button -->
+                <button onclick="openModal()" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-pink-600 to-rose-500 hover:from-pink-700 hover:to-rose-600 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-md shadow-pink-500/20 active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <span>New Task</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Layout -->
+    <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col gap-6">
+
+        <!-- Quick AI Natural Language Parser Banner -->
+        <section class="bg-gradient-to-r from-pink-500/10 via-rose-500/5 to-white border border-pink-200 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-pink-400/10 rounded-full blur-2xl pointer-events-none"></div>
+            <label class="block text-xs font-bold text-pink-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <svg class="w-4 h-4 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+                Quick Add with Smart NLP Parser
+            </label>
+            <div class="flex gap-2">
+                <div class="relative flex-1">
+                    <input type="text" id="nlInput" placeholder="Try: Write Q4 roadmap due 2026-11-20 #Product @Urgent 5pts" 
+                           class="w-full bg-white border border-pink-200 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 text-sm text-slate-800 rounded-xl px-4 py-2.5 placeholder-slate-400 outline-none transition shadow-sm"
+                           onkeydown="if(event.key==='Enter') processNLInput()">
+                </div>
+                <button onclick="processNLInput()" class="px-4 py-2.5 bg-pink-600 hover:bg-pink-700 text-white border border-pink-600 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 shadow-sm whitespace-nowrap active:scale-95">
+                    <span>Parse & Add</span>
+                </button>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-2 flex items-center gap-3 flex-wrap">
+                <span class="font-medium text-slate-700">Syntax tips:</span>
+                <span class="bg-white border border-pink-200/80 px-1.5 py-0.5 rounded text-pink-700 font-mono">due YYYY-MM-DD</span>
+                <span class="bg-white border border-pink-200/80 px-1.5 py-0.5 rounded text-pink-700 font-mono">#ProjectName</span>
+                <span class="bg-white border border-pink-200/80 px-1.5 py-0.5 rounded text-pink-700 font-mono">@Priority</span>
+                <span class="bg-white border border-pink-200/80 px-1.5 py-0.5 rounded text-pink-700 font-mono">Xpts</span>
+            </p>
+        </section>
+
+        <!-- Stats Overview & Controls Header -->
+        <section class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-pink-200/60 pb-4">
+            <!-- Navigation Tabs -->
+            <div class="flex bg-pink-100/70 p-1 rounded-xl border border-pink-200 self-start">
+                <button onclick="switchView('kanban')" id="tabKanban" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg transition text-white bg-pink-600 shadow-sm flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2m0 10V7m6 10v-5a2 2 0 00-2-2h-2a2 2 0 00-2 2v5m4 0a2 2 0 002 2h2a2 2 0 002-2v-5a2 2 0 00-2-2h-2a2 2 0 00-2 2v5"/></svg>
+                    Kanban Board
+                </button>
+                <button onclick="switchView('table')" id="tabTable" class="tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg transition text-slate-600 hover:text-pink-700 flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                    Grid Table View
+                </button>
+            </div>
+
+            <!-- Filters & Counter Pills -->
+            <div class="flex items-center gap-3 flex-wrap">
+                <!-- Project Filter Dropdown -->
+                <select id="filterProject" onchange="renderApp()" class="bg-white border border-pink-200 text-xs text-slate-700 rounded-xl px-3 py-1.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-400 outline-none shadow-sm">
+                    <option value="ALL">All Projects</option>
+                </select>
+
+                <!-- Priority Filter Dropdown -->
+                <select id="filterPriority" onchange="renderApp()" class="bg-white border border-pink-200 text-xs text-slate-700 rounded-xl px-3 py-1.5 focus:border-pink-500 focus:ring-1 focus:ring-pink-400 outline-none shadow-sm">
+                    <option value="ALL">All Priorities</option>
+                    <option value="Urgent">Urgent</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
+                </select>
+
+                <!-- Stats summary badges -->
+                <div class="flex items-center gap-2 text-xs text-slate-600 bg-white px-3.5 py-1.5 rounded-xl border border-pink-200 shadow-sm">
+                    <span>Total: <strong id="statTotal" class="text-pink-700">0</strong></span>
+                    <span class="text-pink-300">•</span>
+                    <span>Done: <strong id="statDone" class="text-emerald-600">0</strong></span>
+                    <span class="text-pink-300">•</span>
+                    <span>Est: <strong id="statMinutes" class="text-pink-600">0m</strong></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- KANBAN VIEW CONTAINER -->
+        <section id="kanbanView" class="grid grid-cols-1 md:grid-cols-3 gap-6 flex-1 min-h-[550px]">
+            <!-- TO DO Column -->
+            <div class="bg-pink-50/40 rounded-2xl border border-pink-200/80 p-4 flex flex-col shadow-sm">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-pink-200">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+                        <h3 class="font-bold text-sm text-slate-800">To Do</h3>
+                        <span id="cntToDo" class="text-xs px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600 font-mono font-semibold">0</span>
+                    </div>
+                </div>
+                <div id="colToDo" class="space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-320px)] pr-1"></div>
+            </div>
+
+            <!-- DOING Column -->
+            <div class="bg-pink-50/40 rounded-2xl border border-pink-200/80 p-4 flex flex-col shadow-sm">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-pink-200">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-pink-500 animate-pulse"></span>
+                        <h3 class="font-bold text-sm text-slate-800">Doing</h3>
+                        <span id="cntDoing" class="text-xs px-2 py-0.5 rounded-full bg-pink-100 border border-pink-200 text-pink-700 font-mono font-semibold">0</span>
+                    </div>
+                </div>
+                <div id="colDoing" class="space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-320px)] pr-1"></div>
+            </div>
+
+            <!-- DONE Column -->
+            <div class="bg-pink-50/40 rounded-2xl border border-pink-200/80 p-4 flex flex-col shadow-sm">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-pink-200">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                        <h3 class="font-bold text-sm text-slate-800">Done</h3>
+                        <span id="cntDone" class="text-xs px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono font-semibold">0</span>
+                    </div>
+                </div>
+                <div id="colDone" class="space-y-3 flex-1 overflow-y-auto max-h-[calc(100vh-320px)] pr-1"></div>
+            </div>
+        </section>
+
+        <!-- TABLE VIEW CONTAINER (HIDDEN BY DEFAULT) -->
+        <section id="tableView" class="hidden bg-white rounded-2xl border border-pink-200 overflow-hidden shadow-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-700">
+                    <thead class="bg-pink-50/80 text-pink-900 uppercase font-bold text-[10px] tracking-wider border-b border-pink-200">
+                        <tr>
+                            <th class="py-3 px-4">Task ID</th>
+                            <th class="py-3 px-4">Title</th>
+                            <th class="py-3 px-4">Project</th>
+                            <th class="py-3 px-4">Priority</th>
+                            <th class="py-3 px-4">Status</th>
+                            <th class="py-3 px-4">Due Date</th>
+                            <th class="py-3 px-4">EST (m)</th>
+                            <th class="py-3 px-4">Points</th>
+                            <th class="py-3 px-4">Created</th>
+                            <th class="py-3 px-4">Completed</th>
+                            <th class="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-pink-100 font-medium"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- TASK MODAL (ADD / EDIT) WITH PERT CALCULATOR -->
+    <div id="taskModal" class="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center hidden p-4 overflow-y-auto">
+        <div class="bg-white border border-pink-200 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative my-8">
+            <div class="flex justify-between items-center pb-4 border-b border-pink-100 mb-5">
+                <h2 id="modalTitle" class="text-lg font-bold text-slate-900">Create New Task</h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-pink-50 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form id="taskForm" onsubmit="saveTask(event)" class="space-y-4">
+                <input type="hidden" id="f_task_id">
+
+                <!-- Title -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Task Title *</label>
+                    <input type="text" id="f_title" required class="w-full bg-white border border-pink-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none shadow-sm">
+                </div>
+
+                <!-- Project & Priority & Status Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Project / Category</label>
+                        <input type="text" id="f_project" list="projectList" placeholder="e.g. Engineering" class="w-full bg-white border border-pink-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none shadow-sm">
+                        <datalist id="projectList"></datalist>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Priority</label>
+                        <select id="f_priority" class="w-full bg-white border border-pink-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none shadow-sm">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+                        <select id="f_status" class="w-full bg-white border border-pink-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none shadow-sm">
+                            <option value="To Do">To Do</option>
+                            <option value="Doing">Doing</option>
+                            <option value="Done">Done</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Due Date & Story Points -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Due Date</label>
+                        <input type="date" id="f_due_date" class="w-full bg-white border border-pink-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none shadow-sm">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Story Points (Fibonacci)</label>
+                        <select id="f_points" class="w-full bg-white border border-pink-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none shadow-sm">
+                            <option value="">None / Unestimated</option>
+                            <option value="1">1 Point (Tiny)</option>
+                            <option value="2">2 Points (Small)</option>
+                            <option value="3">3 Points (Medium)</option>
+                            <option value="5">5 Points (Large)</option>
+                            <option value="8">8 Points (XL)</option>
+                            <option value="13">13 Points (Epic)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- PERT 3-Point Estimate Section -->
+                <div class="bg-pink-50/60 p-4 rounded-xl border border-pink-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-pink-700 flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M12 7h.01"/></svg>
+                            PERT 3-Point Time Estimator
+                        </label>
+                        <span class="text-[10px] text-slate-500 font-medium">Formula: (O + 4M + P) / 6</span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-1">Optimistic (m)</label>
+                            <input type="number" id="pert_o" placeholder="10" oninput="calculatePERT()" class="w-full bg-white border border-pink-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-pink-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-1">Most Likely (m)</label>
+                            <input type="number" id="pert_m" placeholder="30" oninput="calculatePERT()" class="w-full bg-white border border-pink-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-pink-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-600 mb-1">Pessimistic (m)</label>
+                            <input type="number" id="pert_p" placeholder="60" oninput="calculatePERT()" class="w-full bg-white border border-pink-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 outline-none focus:border-pink-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Final Calculated Estimate (est_minutes)</label>
+                        <input type="number" id="f_est_minutes" placeholder="0" class="w-full bg-white border border-pink-200 rounded-xl px-3.5 py-2 text-xs font-mono text-pink-700 font-bold outline-none">
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Notes & Context</label>
+                    <textarea id="f_notes" rows="3" class="w-full bg-white border border-pink-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 focus:border-pink-500 focus:ring-2 focus:ring-pink-200 outline-none shadow-sm" placeholder="Add task context, links, or acceptance criteria..."></textarea>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="flex justify-end gap-2 pt-3 border-t border-pink-100">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-xl text-xs font-semibold transition shadow-md shadow-pink-500/20">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 border border-slate-800 text-white text-xs px-4 py-3 rounded-xl shadow-2xl transition transform translate-y-20 opacity-0 pointer-events-none flex items-center gap-2">
+        <svg id="toastIcon" class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <span id="toastMsg">Task saved successfully!</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // STRICT SCHEMA KEYS & LOCALSTORAGE KEY
+        const STORAGE_KEY = 'chief_of_staff_tasks_v1';
+        const FIELD_KEYS = [
+            'task_id', 'title', 'project', 'priority', 'status',
+            'due_date', 'est_minutes', 'points', 'notes',
+            'created_date', 'completed_date'
+        ];
+
+        // Default initial data if empty
+        const defaultTasks = [
+            {
+                task_id: 'TSK-101',
+                title: 'Review System Architecture & Schema',
+                project: 'Engineering',
+                priority: 'High',
+                status: 'Done',
+                due_date: getTodayString(),
+                est_minutes: 45,
+                points: '3',
+                notes: 'Verify 11 strict fields for Chief of Staff compatibility.',
+                created_date: getTodayString(),
+                completed_date: getTodayString()
+            },
+            {
+                task_id: 'TSK-102',
+                title: 'Configure PERT Estimation Workflow',
+                project: 'Planning',
+                priority: 'Urgent',
+                status: 'Doing',
+                due_date: getTodayString(2),
+                est_minutes: 60,
+                points: '5',
+                notes: 'Setup Optimistic, Most Likely, and Pessimistic inputs.',
+                created_date: getTodayString(),
+                completed_date: ''
+            },
+            {
+                task_id: 'TSK-103',
+                title: 'Export Initial Baseline CSV',
+                project: 'Operations',
+                priority: 'Medium',
+                status: 'To Do',
+                due_date: getTodayString(5),
+                est_minutes: 20,
+                points: '1',
+                notes: 'Export formatted tasks_YYYY-MM-DD.csv artifact.',
+                created_date: getTodayString(),
+                completed_date: ''
+            }
+        ];
+
+        let tasks = [];
+        let currentView = 'kanban';
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTasks();
+            renderApp();
+        });
+
+        // Helper: Today YYYY-MM-DD
+        function getTodayString(offsetDays = 0) {
+            const d = new Date();
+            d.setDate(d.getDate() + offsetDays);
+            return d.toISOString().split('T')[0];
+        }
+
+        // Storage Management
+        function loadTasks() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    tasks = JSON.parse(stored);
+                } else {
+                    tasks = [...defaultTasks];
+                    saveTasksToStorage();
+                }
+            } catch (e) {
+                console.error("Failed to load tasks", e);
+                tasks = [...defaultTasks];
+            }
+        }
+
+        function saveTasksToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+        }
+
+        // Generate Unique Task ID (TSK-XXX)
+        function generateTaskId() {
+            let maxNum = 100;
+            tasks.forEach(t => {
+                if (t.task_id && t.task_id.startsWith('TSK-')) {
+                    const num = parseInt(t.task_id.replace('TSK-', ''), 10);
+                    if (!isNaN(num) && num > maxNum) maxNum = num;
+                }
+            });
+            return `TSK-${maxNum + 1}`;
+        }
+
+        // View Switching (Kanban vs Table)
+        function switchView(view) {
+            currentView = view;
+            const tabK = document.getElementById('tabKanban');
+            const tabT = document.getElementById('tabTable');
+            const kanbanSec = document.getElementById('kanbanView');
+            const tableSec = document.getElementById('tableView');
+
+            if (view === 'kanban') {
+                kanbanSec.classList.remove('hidden');
+                tableSec.classList.add('hidden');
+                tabK.className = "tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg transition text-white bg-indigo-600 shadow-sm flex items-center gap-2";
+                tabT.className = "tab-btn px-4 py-1.5 text-xs font-medium rounded-lg transition text-slate-400 hover:text-slate-200 flex items-center gap-2";
+            } else {
+                kanbanSec.classList.add('hidden');
+                tableSec.classList.remove('hidden');
+                tabT.className = "tab-btn px-4 py-1.5 text-xs font-semibold rounded-lg transition text-white bg-indigo-600 shadow-sm flex items-center gap-2";
+                tabK.className = "tab-btn px-4 py-1.5 text-xs font-medium rounded-lg transition text-slate-400 hover:text-slate-200 flex items-center gap-2";
+            }
+            renderApp();
+        }
+
+        // PERT Formula Calculation
+        function calculatePERT() {
+            const o = parseFloat(document.getElementById('pert_o').value) || 0;
+            const m = parseFloat(document.getElementById('pert_m').value) || 0;
+            const p = parseFloat(document.getElementById('pert_p').value) || 0;
+
+            if (o > 0 || m > 0 || p > 0) {
+                const expected = Math.round((o + (4 * m) + p) / 6);
+                document.getElementById('f_est_minutes').value = expected;
+            }
+        }
+
+        // Natural Language Parsing
+        function processNLInput() {
+            const inputEl = document.getElementById('nlInput');
+            const val = inputEl.value.trim();
+            if (!val) return;
+
+            let title = val;
+            let due_date = getTodayString(1);
+            let project = 'General';
+            let priority = 'Medium';
+            let points = '';
+
+            // Extract due date (e.g., due 2026-11-20 or 2026-11-20)
+            const dateMatch = title.match(/(?:due\s+)?(\d{4}-\d{2}-\d{2})/i);
+            if (dateMatch) {
+                due_date = dateMatch[1];
+                title = title.replace(dateMatch[0], '');
+            }
+
+            // Extract project (#Project)
+            const projMatch = title.match(/#(\w+)/);
+            if (projMatch) {
+                project = projMatch[1];
+                title = title.replace(projMatch[0], '');
+            }
+
+            // Extract priority (@Urgent, @High, @Medium, @Low)
+            const prioMatch = title.match(/@(Urgent|High|Medium|Low)/i);
+            if (prioMatch) {
+                priority = prioMatch[1].charAt(0).toUpperCase() + prioMatch[1].slice(1).toLowerCase();
+                title = title.replace(prioMatch[0], '');
+            }
+
+            // Extract story points (Xpts)
+            const ptsMatch = title.match(/(\d+)pts/i);
+            if (ptsMatch) {
+                points = ptsMatch[1];
+                title = title.replace(ptsMatch[0], '');
+            }
+
+            title = title.trim().replace(/\s+/g, ' ');
+
+            const newTask = {
+                task_id: generateTaskId(),
+                title: title || 'New Parsed Task',
+                project: project,
+                priority: priority,
+                status: 'To Do',
+                due_date: due_date,
+                est_minutes: points ? parseInt(points) * 20 : 30, // rough heuristic fallback
+                points: points,
+                notes: `Parsed via NLP Input: "${val}"`,
+                created_date: getTodayString(),
+                completed_date: ''
+            };
+
+            tasks.unshift(newTask);
+            saveTasksToStorage();
+            renderApp();
+            inputEl.value = '';
+            showToast(`Task "${newTask.title}" added via Smart NLP!`);
+        }
+
+        // Smart Auto-Prioritize Sorting
+        function autoPrioritize() {
+            const priorityWeight = { 'Urgent': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
+            
+            tasks.sort((a, b) => {
+                // Done tasks go to bottom
+                if (a.status === 'Done' && b.status !== 'Done') return 1;
+                if (a.status !== 'Done' && b.status === 'Done') return -1;
+
+                // Priority Weight
+                const pA = priorityWeight[a.priority] || 0;
+                const pB = priorityWeight[b.priority] || 0;
+                if (pA !== pB) return pB - pA;
+
+                // Due Date (sooner first)
+                if (a.due_date && b.due_date) {
+                    if (a.due_date !== b.due_date) return a.due_date.localeCompare(b.due_date);
+                }
+
+                // Estimated Minutes (shorter first for quick wins)
+                return (Number(a.est_minutes) || 0) - (Number(b.est_minutes) || 0);
+            });
+
+            saveTasksToStorage();
+            renderApp();
+            showToast('Tasks auto-prioritized by Urgency, Due Date & Effort!');
+        }
+
+        // Render Main Views
+        function renderApp() {
+            updateProjectDropdown();
+            
+            const filterProj = document.getElementById('filterProject').value;
+            const filterPrio = document.getElementById('filterPriority').value;
+
+            // Filter logic
+            const filtered = tasks.filter(t => {
+                const matchP = (filterProj === 'ALL' || t.project === filterProj);
+                const matchPr = (filterPrio === 'ALL' || t.priority === filterPrio);
+                return matchP && matchPr;
+            });
+
+            // Update Header Stats
+            document.getElementById('statTotal').innerText = tasks.length;
+            document.getElementById('statDone').innerText = tasks.filter(t => t.status === 'Done').length;
+            const totalMins = tasks.reduce((acc, curr) => acc + (parseInt(curr.est_minutes) || 0), 0);
+            document.getElementById('statMinutes').innerText = `${totalMins}m`;
+
+            // Render Kanban
+            renderKanban(filtered);
+            // Render Table
+            renderTable(filtered);
+        }
+
+        function updateProjectDropdown() {
+            const select = document.getElementById('filterProject');
+            const dataList = document.getElementById('projectList');
+            const currentVal = select.value;
+
+            const projects = Array.from(new Set(tasks.map(t => t.project).filter(Boolean)));
+            
+            // Dropdown options
+            select.innerHTML = '<option value="ALL">All Projects</option>' + 
+                projects.map(p => `<option value="${escapeHTML(p)}">${escapeHTML(p)}</option>`).join('');
+            select.value = projects.includes(currentVal) ? currentVal : 'ALL';
+
+            // Modal Datalist
+            dataList.innerHTML = projects.map(p => `<option value="${escapeHTML(p)}">`).join('');
+        }
+
+        function renderKanban(taskList) {
+            const colToDo = document.getElementById('colToDo');
+            const colDoing = document.getElementById('colDoing');
+            const colDone = document.getElementById('colDone');
+
+            colToDo.innerHTML = '';
+            colDoing.innerHTML = '';
+            colDone.innerHTML = '';
+
+            let cToDo = 0, cDoing = 0, cDone = 0;
+
+            taskList.forEach(t => {
+                const card = createKanbanCard(t);
+                if (t.status === 'Doing') {
+                    colDoing.appendChild(card);
+                    cDoing++;
+                } else if (t.status === 'Done') {
+                    colDone.appendChild(card);
+                    cDone++;
+                } else {
+                    colToDo.appendChild(card);
+                    cToDo++;
+                }
+            });
+
+            document.getElementById('cntToDo').innerText = cToDo;
+            document.getElementById('cntDoing').innerText = cDoing;
+            document.getElementById('cntDone').innerText = cDone;
+        }
+
+        function createKanbanCard(t) {
+            const el = document.createElement('div');
+            el.className = `bg-white border border-pink-200/90 rounded-xl p-4 shadow-sm hover:shadow-md hover:border-pink-300 transition flex flex-col justify-between group`;
+            
+            const isOverdue = t.due_date && t.due_date < getTodayString() && t.status !== 'Done';
+            const prioBadge = getPriorityBadgeClass(t.priority);
+
+            el.innerHTML = `
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="font-mono text-[10px] text-slate-400 font-semibold">${escapeHTML(t.task_id)}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border ${prioBadge}">${escapeHTML(t.priority)}</span>
+                            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-pink-50 text-pink-800 border border-pink-200/80">${escapeHTML(t.project || 'General')}</span>
+                        </div>
+                    </div>
+                    <h4 class="font-bold text-xs text-slate-900 group-hover:text-pink-600 transition ${t.status === 'Done' ? 'line-through text-slate-400 font-normal' : ''}">
+                        ${escapeHTML(t.title)}
+                    </h4>
+                    ${t.notes ? `<p class="text-[11px] text-slate-500 mt-1 line-clamp-2">${escapeHTML(t.notes)}</p>` : ''}
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-pink-100 flex items-center justify-between text-[11px] text-slate-500">
+                    <div class="flex items-center gap-2">
+                        <span class="flex items-center gap-1 font-medium ${isOverdue ? 'text-rose-600 font-bold' : ''}" title="Due Date">
+                            <svg class="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            ${t.due_date || 'No Due'}
+                        </span>
+                        ${t.est_minutes ? `<span class="font-mono bg-pink-50 text-pink-700 px-1.5 py-0.5 rounded font-semibold border border-pink-200/60">${t.est_minutes}m</span>` : ''}
+                        ${t.points ? `<span class="font-mono bg-rose-50 text-rose-700 px-1.5 py-0.5 rounded font-semibold border border-rose-200/60">${t.points}pt</span>` : ''}
+                    </div>
+
+                    <div class="flex items-center gap-1">
+                        <button onclick="toggleStatus('${t.task_id}')" class="p-1 rounded hover:bg-pink-50 text-slate-400 hover:text-emerald-600 transition" title="Cycle Status">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </button>
+                        <button onclick="editTask('${t.task_id}')" class="p-1 rounded hover:bg-pink-50 text-slate-400 hover:text-pink-600 transition" title="Edit">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        </button>
+                        <button onclick="deleteTask('${t.task_id}')" class="p-1 rounded hover:bg-pink-50 text-slate-400 hover:text-rose-600 transition" title="Delete">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+            return el;
+        }
+
+        function renderTable(taskList) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            taskList.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-pink-50/50 transition border-b border-pink-100";
+                const prioBadge = getPriorityBadgeClass(t.priority);
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-mono text-slate-400 font-semibold">${escapeHTML(t.task_id)}</td>
+                    <td class="py-3 px-4 text-slate-900 font-bold ${t.status==='Done'?'line-through text-slate-400 font-normal':''}">${escapeHTML(t.title)}</td>
+                    <td class="py-3 px-4 text-slate-600">${escapeHTML(t.project || '-')}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold border ${prioBadge}">${escapeHTML(t.priority)}</span></td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-[10px] font-semibold ${t.status==='Done'?'bg-emerald-50 text-emerald-700 border border-emerald-200':t.status==='Doing'?'bg-pink-50 text-pink-700 border border-pink-200':'bg-slate-100 text-slate-700 border border-slate-200'}">${escapeHTML(t.status)}</span></td>
+                    <td class="py-3 px-4 text-slate-600 font-mono">${escapeHTML(t.due_date || '-')}</td>
+                    <td class="py-3 px-4 text-pink-700 font-mono font-semibold">${t.est_minutes || '0'}m</td>
+                    <td class="py-3 px-4 text-rose-700 font-mono font-semibold">${t.points || '-'}</td>
+                    <td class="py-3 px-4 text-slate-400 font-mono">${escapeHTML(t.created_date || '-')}</td>
+                    <td class="py-3 px-4 text-slate-400 font-mono">${escapeHTML(t.completed_date || '-')}</td>
+                    <td class="py-3 px-4 text-right space-x-1">
+                        <button onclick="toggleStatus('${t.task_id}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-semibold transition">Cycle</button>
+                        <button onclick="editTask('${t.task_id}')" class="px-2 py-1 rounded bg-pink-100 hover:bg-pink-200 text-pink-700 text-[10px] font-semibold transition">Edit</button>
+                        <button onclick="deleteTask('${t.task_id}')" class="px-2 py-1 rounded bg-rose-100 hover:bg-rose-200 text-rose-700 text-[10px] font-semibold transition">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getPriorityBadgeClass(prio) {
+            switch (prio) {
+                case 'Urgent': return 'bg-rose-100 text-rose-700 border-rose-300';
+                case 'High': return 'bg-pink-100 text-pink-700 border-pink-300';
+                case 'Medium': return 'bg-rose-50 text-rose-600 border-rose-200';
+                case 'Low': return 'bg-slate-100 text-slate-600 border-slate-200';
+                default: return 'bg-slate-100 text-slate-600 border-slate-200';
+            }
+        }
+
+        // Toggle Status Cycle (To Do -> Doing -> Done -> To Do)
+        function toggleStatus(id) {
+            const t = tasks.find(x => x.task_id === id);
+            if (!t) return;
+
+            if (t.status === 'To Do') {
+                t.status = 'Doing';
+                t.completed_date = '';
+            } else if (t.status === 'Doing') {
+                t.status = 'Done';
+                t.completed_date = getTodayString();
+            } else {
+                t.status = 'To Do';
+                t.completed_date = '';
+            }
+
+            saveTasksToStorage();
+            renderApp();
+            showToast(`Status updated to "${t.status}"`);
+        }
+
+        // Delete Task
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.task_id !== id);
+            saveTasksToStorage();
+            renderApp();
+            showToast('Task deleted');
+        }
+
+        // Modal Controls
+        function openModal(editId = null) {
+            document.getElementById('taskForm').reset();
+            document.getElementById('pert_o').value = '';
+            document.getElementById('pert_m').value = '';
+            document.getElementById('pert_p').value = '';
+
+            if (editId) {
+                const t = tasks.find(x => x.task_id === editId);
+                if (t) {
+                    document.getElementById('modalTitle').innerText = `Edit Task (${t.task_id})`;
+                    document.getElementById('f_task_id').value = t.task_id;
+                    document.getElementById('f_title').value = t.title || '';
+                    document.getElementById('f_project').value = t.project || '';
+                    document.getElementById('f_priority').value = t.priority || 'Medium';
+                    document.getElementById('f_status').value = t.status || 'To Do';
+                    document.getElementById('f_due_date').value = t.due_date || '';
+                    document.getElementById('f_est_minutes').value = t.est_minutes || '';
+                    document.getElementById('f_points').value = t.points || '';
+                    document.getElementById('f_notes').value = t.notes || '';
+                }
+            } else {
+                document.getElementById('modalTitle').innerText = 'Create New Task';
+                document.getElementById('f_task_id').value = '';
+                document.getElementById('f_due_date').value = getTodayString(1);
+            }
+
+            document.getElementById('taskModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('taskModal').classList.add('hidden');
+        }
+
+        function editTask(id) {
+            openModal(id);
+        }
+
+        // Form Submit handler
+        function saveTask(e) {
+            e.preventDefault();
+            const id = document.getElementById('f_task_id').value;
+            const statusVal = document.getElementById('f_status').value;
+
+            if (id) {
+                // Edit existing
+                const t = tasks.find(x => x.task_id === id);
+                if (t) {
+                    t.title = document.getElementById('f_title').value.trim();
+                    t.project = document.getElementById('f_project').value.trim() || 'General';
+                    t.priority = document.getElementById('f_priority').value;
+                    
+                    if (t.status !== 'Done' && statusVal === 'Done') {
+                        t.completed_date = getTodayString();
+                    } else if (statusVal !== 'Done') {
+                        t.completed_date = '';
+                    }
+                    t.status = statusVal;
+
+                    t.due_date = document.getElementById('f_due_date').value;
+                    t.est_minutes = parseInt(document.getElementById('f_est_minutes').value) || 0;
+                    t.points = document.getElementById('f_points').value;
+                    t.notes = document.getElementById('f_notes').value.trim();
+                }
+            } else {
+                // Create new
+                const newTask = {
+                    task_id: generateTaskId(),
+                    title: document.getElementById('f_title').value.trim(),
+                    project: document.getElementById('f_project').value.trim() || 'General',
+                    priority: document.getElementById('f_priority').value,
+                    status: statusVal,
+                    due_date: document.getElementById('f_due_date').value,
+                    est_minutes: parseInt(document.getElementById('f_est_minutes').value) || 0,
+                    points: document.getElementById('f_points').value,
+                    notes: document.getElementById('f_notes').value.trim(),
+                    created_date: getTodayString(),
+                    completed_date: statusVal === 'Done' ? getTodayString() : ''
+                };
+                tasks.unshift(newTask);
+            }
+
+            saveTasksToStorage();
+            renderApp();
+            closeModal();
+            showToast('Task saved successfully!');
+        }
+
+        // CSV Export Functionality (Strict 11 Headers)
+        function exportToCSV() {
+            if (tasks.length === 0) {
+                showToast('No tasks available to export.');
+                return;
+            }
+
+            // CSV Headers (exact schema requirement)
+            const headers = FIELD_KEYS;
+            
+            const csvRows = [headers.join(',')];
+
+            tasks.forEach(t => {
+                const row = headers.map(key => {
+                    let val = t[key] !== undefined && t[key] !== null ? String(t[key]) : '';
+                    // Escape quotes and double-quote strings containing commas/newlines
+                    val = val.replace(/"/g, '""');
+                    if (val.includes(',') || val.includes('\n') || val.includes('"')) {
+                        val = `"${val}"`;
+                    }
+                    return val;
+                });
+                csvRows.push(row.join(','));
+            });
+
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            // Date stamped filename: tasks_YYYY-MM-DD.csv
+            const filename = `tasks_${getTodayString()}.csv`;
+            
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast(`Exported ${filename} successfully!`);
+        }
+
+        // CSV Import Functionality
+        function handleCSVImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    const parsed = parseCSVText(text);
+                    if (parsed.length > 0) {
+                        tasks = parsed;
+                        saveTasksToStorage();
+                        renderApp();
+                        showToast(`Successfully imported ${parsed.length} tasks!`);
+                    } else {
+                        showToast('No valid task rows found in CSV.');
+                    }
+                } catch (err) {
+                    console.error('Import error', err);
+                    showToast('Failed to parse CSV file.');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Reset input
+        }
+
+        // Robust CSV Line Parser
+        function parseCSVText(text) {
+            const lines = text.split(/\r\n|\n/);
+            if (lines.length < 2) return [];
+
+            const headers = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+            const parsedTasks = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                const values = parseCSVLine(lines[i]);
+                if (values.length < headers.length) continue;
+
+                const taskObj = {};
+                FIELD_KEYS.forEach(field => {
+                    const idx = headers.indexOf(field.toLowerCase());
+                    if (idx !== -1) {
+                        taskObj[field] = values[idx] ? values[idx].trim() : '';
+                    } else {
+                        taskObj[field] = '';
+                    }
+                });
+
+                // Ensure fallback for required task_id
+                if (!taskObj.task_id) {
+                    taskObj.task_id = `TSK-IMP-${i}`;
+                }
+
+                parsedTasks.push(taskObj);
+            }
+
+            return parsedTasks;
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let start = 0;
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                if (line[i] === '"') {
+                    inQuotes = !inQuotes;
+                } else if (line[i] === ',' && !inQuotes) {
+                    let field = line.substring(start, i).trim();
+                    if (field.startsWith('"') && field.endsWith('"')) {
+                        field = field.substring(1, field.length - 1).replace(/""/g, '"');
+                    }
+                    result.push(field);
+                    start = i + 1;
+                }
+            }
+            let lastField = line.substring(start).trim();
+            if (lastField.startsWith('"') && lastField.endsWith('"')) {
+                lastField = lastField.substring(1, lastField.length - 1).replace(/""/g, '"');
+            }
+            result.push(lastField);
+            return result;
+        }
+
+        // Helper Toast Notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // HTML Escape Security helper
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>
