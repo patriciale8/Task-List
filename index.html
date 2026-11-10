@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Tracker</title>
+    <title>Task Tracker & PERT Estimator</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -70,7 +70,7 @@
                     <h1 class="font-bold text-lg tracking-tight text-slate-900">
                         Task Tracker <span class="text-pink-600 text-xs px-2 py-0.5 rounded-full border border-pink-200 bg-pink-50 font-medium">Task Engine</span>
                     </h1>
-                    <p class="text-xs text-slate-500">Structured Data Foundation for AI Task Tracker</p>
+                    <p class="text-xs text-slate-500">Structured Data Foundation & Task List Management</p>
                 </div>
             </div>
 
@@ -372,7 +372,7 @@
     <!-- JAVASCRIPT LOGIC -->
     <script>
         // STRICT SCHEMA KEYS & LOCALSTORAGE KEY
-        const STORAGE_KEY = 'tasks_tracker_v1';
+        const STORAGE_KEY = 'task_list_data_v1';
         const FIELD_KEYS = [
             'task_id', 'title', 'project', 'priority', 'status',
             'due_date', 'est_minutes', 'points', 'notes',
@@ -390,7 +390,7 @@
                 due_date: getTodayString(),
                 est_minutes: 45,
                 points: '3',
-                notes: 'Verify 11 strict fields for Task Tracker compatibility.',
+                notes: 'Verify 11 strict fields for Task List compatibility.',
                 created_date: getTodayString(),
                 completed_date: getTodayString()
             },
